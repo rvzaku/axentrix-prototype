@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AXENTRIX — Hollister Co.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── DESIGN TOKENS ─────────────────────────────────────────── */
+:root {
+  --bg:         #F5F4F0;     /* Cloud Dancer */
+  --surface:    #E9EEF3;     /* Ice Melt */
+  --surface2:   #FFFFFF;
+  --border:     #D8DFE8;
+  --accent:     #2B6CB8;     /* Ice Melt Blue */
+  --accent-lt:  #EBF2FB;
+  --accent-hv:  #1E54A0;
+  --text:       #18202E;
+  --text-2:     #516074;
+  --text-3:     #8A97AA;
+  --success:    #166534; --success-bg: #DCFCE7;
+  --warn:       #92400E;    --warn-bg:    #FEF3C7;
+  --danger:     #991B1B;    --danger-bg:  #FEE2E2;
+  --locked:     #64748B;    --locked-bg:  #F1F5F9;
+  --purple:     #4338CA;    --purple-bg:  #EEF2FF;
+  --r:  8px;
+  --r2: 12px;
+  --r3: 16px;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow2: 0 4px 16px rgba(0,0,0,.08);
+}
+*, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+html { font-size: 14px; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+h1,h2,h3,h4 { font-family: 'DM Serif Display', serif; }
+
+/* ── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 9px; }
+
+/* ── TOPBAR ─────────────────────────────────────────────────── */
+.topbar {
+  height: 54px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+  position: sticky; top:0; z-index: 100;
+  box-shadow: var(--shadow);
+}
+.topbar-brand {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.25rem;
+  letter-spacing: -.01em;
+  color: var(--text);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.topbar-brand .dot { width:8px; height:8px; border-radius:50%; background:var(--accent); }
+.topbar-search {
+  flex: 1; max-width: 320px;
+  position: relative;
+}
+.topbar-search input {
+  width: 100%;
+  padding: 7px 12px 7px 32px;
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .85rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s;
+}
+.topbar-search input:focus { border-color: var(--accent); }
+.topbar-search .si {
+  position: absolute; left:10px; top:50%; transform:translateY(-50%);
+  color: var(--text-3); font-size:.9rem; pointer-events:none;
+}
+.topbar-right { margin-left:auto; display:flex; align-items:center; gap:10px; }
+.icon-btn {
+  width:34px; height:34px; border-radius:50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  display: flex; align-items:center; justify-content:center;
+  cursor: pointer; position:relative;
+  font-size:.9rem; color:var(--text-2);
+  transition: background .15s, border-color .15s;
+}
+.icon-btn:hover { background:var(--surface); border-color:var(--accent); }
+.notif-badge {
+  position: absolute; top:-2px; right:-2px;
+  width:16px; height:16px; border-radius:50%;
+  background: var(--danger); color:#fff;
+  font-size:.6rem; font-weight:600;
+  display:flex; align-items:center; justify-content:center;
+  border: 2px solid var(--surface2);
+}
+.avatar {
+  width:34px; height:34px; border-radius:50%;
+  background: var(--accent); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.75rem; font-weight:600; cursor:pointer;
+  font-family:'DM Sans',sans-serif; letter-spacing:.03em;
+}
+.topbar-role-tag {
+  padding: 3px 10px; border-radius:20px;
+  font-size:.7rem; font-weight:600; letter-spacing:.04em;
+  background: var(--accent-lt); color: var(--accent);
+}
+
+/* ── LAYOUT ─────────────────────────────────────────────────── */
+.layout { display:flex; flex:1; overflow:hidden; height:calc(100vh - 54px); }
+.sidebar {
+  width: 216px; flex-shrink:0;
+  background: var(--surface2);
+  border-right: 1px solid var(--border);
+  padding: 16px 10px;
+  overflow-y: auto;
+  display: flex; flex-direction:column; gap:4px;
+}
+.main { flex:1; overflow-y:auto; padding: 24px; }
+
+/* ── SIDEBAR NAV ─── */
+.nav-section-label {
+  font-size:.65rem; font-weight:600; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--text-3);
+  padding: 10px 12px 4px; margin-top:4px;
+}
+.nav-item {
+  display:flex; align-items:center; gap:9px;
+  padding: 8px 12px; border-radius:var(--r);
+  font-size:.82rem; color:var(--text-2); cursor:pointer;
+  transition: background .12s, color .12s;
+  white-space:nowrap;
+}
+.nav-item:hover { background:var(--surface); color:var(--text); }
+.nav-item.active { background:var(--accent-lt); color:var(--accent); font-weight:500; }
+.nav-item .ni { font-size:.95rem; }
+.nav-item .badge-count {
+  margin-left:auto; min-width:18px; height:18px;
+  border-radius:9px; background:var(--accent); color:#fff;
+  font-size:.65rem; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  padding: 0 4px;
+}
+.sidebar-bottom {
+  margin-top:auto; padding:12px;
+  background:var(--accent-lt); border-radius:var(--r);
+  font-size:.75rem; color:var(--accent);
+}
+.sidebar-bottom strong { display:block; font-size:.8rem; margin-bottom:2px; }
+
+/* ── PAGES ─── */
+.page { display:none; animation: fadein .2s ease; }
+.page.active { display:block; }
+@keyframes fadein { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── TYPOGRAPHY ─── */
+.page-title { font-size:1.6rem; font-weight:normal; letter-spacing:-.02em; margin-bottom:4px; }
+.page-sub { font-size:.82rem; color:var(--text-2); margin-bottom:20px; }
+.section-title { font-size:1rem; font-weight:500; font-family:'DM Serif Display',serif; letter-spacing:-.01em; margin-bottom:12px; }
+
+/* ── CARDS ─── */
+.card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+.card-title { font-size:.82rem; font-weight:600; color:var(--text-2); letter-spacing:.04em; text-transform:uppercase; margin-bottom:12px; }
+
+/* ── GRIDS ─── */
+.g2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+.g4 { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; }
+.g5 { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+
+/* ── KPI CARDS ─── */
+.kpi { background:var(--surface2); border:1px solid var(--border); border-radius:var(--r2); padding:16px 18px; box-shadow:var(--shadow); }
+.kpi-label { font-size:.72rem; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); margin-bottom:6px; }
+.kpi-value { font-family:'DM Serif Display',serif; font-size:2rem; letter-spacing:-.03em; color:var(--text); line-height:1; }
+.kpi-sub { font-size:.72rem; color:var(--text-3); margin-top:4px; }
+.kpi-accent .kpi-value { color:var(--accent); }
+.kpi-warn .kpi-value   { color:var(--warn); }
+.kpi-danger .kpi-value { color:var(--danger); }
+
+/* ── BADGES ─── */
+.badge {
+  display:inline-flex; align-items:center; gap:5px;
+  padding: 3px 9px; border-radius:20px;
+  font-size:.72rem; font-weight:600; letter-spacing:.02em;
+  white-space:nowrap;
+}
+.badge::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; flex-shrink:0; }
+.b-approved { background:var(--success-bg); color:var(--success); }
+.b-pending  { background:var(--warn-bg);    color:var(--warn); }
+.b-rejected { background:var(--danger-bg);  color:var(--danger); }
+.b-locked   { background:var(--locked-bg);  color:var(--locked); }
+.b-info     { background:var(--accent-lt);  color:var(--accent); }
+.b-purple   { background:var(--purple-bg);  color:var(--purple); }
+
+/* ── BUTTONS ─── */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  padding: 8px 18px; border-radius:var(--r);
+  font-size:.82rem; font-weight:500;
+  font-family:'DM Sans',sans-serif;
+  cursor:pointer; transition: all .15s;
+  border: 1.5px solid transparent;
+  white-space:nowrap;
+}
+.btn-primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+.btn-primary:hover { background:var(--accent-hv); border-color:var(--accent-hv); }
+.btn-secondary { background:transparent; color:var(--accent); border-color:var(--accent); }
+.btn-secondary:hover { background:var(--accent-lt); }
+.btn-danger { background:transparent; color:var(--danger); border-color:var(--danger); }
+.btn-danger:hover { background:var(--danger-bg); }
+.btn-ghost { background:transparent; color:var(--text-2); border-color:var(--border); }
+.btn-ghost:hover { background:var(--surface); }
+.btn-sm { padding:5px 12px; font-size:.75rem; }
+.btn-disabled, .btn[disabled] { background:var(--surface); color:var(--text-3); border-color:var(--border); cursor:not-allowed; opacity:.7; pointer-events:none; }
+
+/* ── INPUTS ─── */
+.field { display:flex; flex-direction:column; gap:4px; }
+.field label { font-size:.75rem; font-weight:500; color:var(--text-2); }
+.field input, .field select, .field textarea {
+  width:100%; padding:8px 11px;
+  border-radius:var(--r); border:1.5px solid var(--border);
+  font-family:'DM Sans',sans-serif; font-size:.82rem; color:var(--text);
+  background:var(--surface2); outline:none;
+  transition:border-color .15s, box-shadow .15s;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color:var(--accent);
+  box-shadow: 0 0 0 3px rgba(43,108,184,.12);
+}
+.field input::placeholder, .field textarea::placeholder { color:var(--text-3); }
+
+/* ── TABLE ─── */
+.tbl-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:.8rem; }
+thead th {
+  text-align:left; padding:8px 12px;
+  font-size:.68rem; font-weight:600; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--text-3); border-bottom:1px solid var(--border);
+  background:var(--bg);
+}
+tbody td { padding:10px 12px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
+tbody tr:hover td { background:var(--surface); }
+tbody tr:last-child td { border-bottom:none; }
+.td-muted { color:var(--text-2); font-size:.75rem; }
+
+/* ── TABS ─── */
+.tab-bar { display:flex; border-bottom:1px solid var(--border); margin-bottom:18px; gap:0; overflow-x:auto; }
+.tab {
+  padding:9px 16px; font-size:.8rem; font-weight:500;
+  color:var(--text-2); cursor:pointer;
+  border-bottom:2px solid transparent; margin-bottom:-1px;
+  transition:all .12s; white-space:nowrap;
+}
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+/* ── STAGE ROWS ─── */
+.stage-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 14px; border-radius:var(--r); border:1px solid var(--border);
+  margin-bottom:6px; background:var(--surface2); transition:all .15s;
+}
+.stage-row.approved { border-left:3px solid var(--success); }
+.stage-row.pending  { border-left:3px solid #D97706; }
+.stage-row.rejected { border-left:3px solid var(--danger); }
+.stage-row.locked   { background:var(--locked-bg); opacity:.65; }
+.stage-name { font-size:.82rem; font-weight:500; }
+.stage-meta { font-size:.72rem; color:var(--text-2); margin-top:2px; }
+
+/* ── APPROVAL PANEL ─── */
+.ap-panel {
+  background:var(--bg); border:1px solid var(--border);
+  border-radius:var(--r2); padding:18px;
+}
+.ap-submitted-files { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+.file-chip {
+  padding:5px 10px; background:var(--surface2);
+  border:1px solid var(--border); border-radius:var(--r);
+  font-size:.72rem; color:var(--accent); cursor:pointer;
+  display:flex; align-items:center; gap:5px;
+}
+.file-chip:hover { background:var(--accent-lt); }
+
+/* ── UPLOAD ZONE ─── */
+.upload-zone {
+  border:1.5px dashed var(--border); border-radius:var(--r);
+  padding:18px; text-align:center; background:var(--bg);
+  cursor:pointer; transition:all .15s;
+}
+.upload-zone:hover { border-color:var(--accent); background:var(--accent-lt); }
+.upload-zone .icon { font-size:1.4rem; color:var(--accent); margin-bottom:4px; }
+.upload-zone .label { font-size:.78rem; font-weight:500; color:var(--text-2); }
+.upload-zone .hint { font-size:.7rem; color:var(--text-3); margin-top:2px; }
+
+/* ── NOTIFICATION ITEMS ─── */
+.notif-item {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:10px 12px; border-radius:var(--r);
+  border:1px solid var(--border); background:var(--surface2);
+  cursor:pointer; transition:background .12s; margin-bottom:6px;
+}
+.notif-item:hover { background:var(--surface); }
+.notif-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+.notif-title { font-size:.78rem; font-weight:500; color:var(--text); margin-bottom:2px; }
+.notif-sub   { font-size:.7rem; color:var(--text-3); }
+
+/* ── TNA BAR ─── */
+.tna-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.tna-label { font-size:.75rem; color:var(--text-2); width:110px; flex-shrink:0; }
+.tna-track { flex:1; display:flex; gap:3px; }
+.tna-seg { flex:1; height:7px; border-radius:3px; }
+
+/* ── ROLE PILL ─── */
+.role-pill { padding:2px 9px; border-radius:20px; font-size:.68rem; font-weight:600; letter-spacing:.03em; }
+.r-merch   { background:var(--accent-lt); color:var(--accent); }
+.r-factory { background:var(--success-bg); color:var(--success); }
+.r-qa      { background:var(--warn-bg); color:var(--warn); }
+.r-tech    { background:var(--purple-bg); color:var(--purple); }
+
+/* ── DROPDOWN ─── */
+.dropdown-menu {
+  position:absolute; top:calc(100% + 6px); right:0;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--r2); padding:6px; min-width:190px;
+  box-shadow:var(--shadow2); z-index:999; display:none;
+}
+.dropdown-menu.open { display:block; animation:fadein .15s ease; }
+.dd-item {
+  padding:8px 12px; border-radius:var(--r);
+  font-size:.8rem; color:var(--text); cursor:pointer;
+  transition:background .1s;
+}
+.dd-item:hover { background:var(--surface); }
+.dd-sep { height:1px; background:var(--border); margin:4px 0; }
+.dd-label { padding:6px 12px 2px; font-size:.65rem; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); }
+
+/* ── MODAL ─── */
+.modal-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(20,28,46,.4); z-index:1000;
+  align-items:center; justify-content:center;
+}
+.modal-overlay.open { display:flex; animation:fadein .15s ease; }
+.modal {
+  background:var(--surface2); border-radius:var(--r3);
+  padding:26px; max-width:480px; width:90%;
+  border:1px solid var(--border); box-shadow:var(--shadow2);
+}
+.modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+.modal-title { font-family:'DM Serif Display',serif; font-size:1.15rem; }
+.modal-close { background:none; border:none; font-size:1.1rem; color:var(--text-3); cursor:pointer; line-height:1; }
+.modal-close:hover { color:var(--text); }
+
+/* ── STYLE HEADER ─── */
+.style-header {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--r2); padding:18px 22px; margin-bottom:16px;
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:12px; flex-wrap:wrap; box-shadow:var(--shadow);
+}
+.style-id { font-family:'DM Serif Display',serif; font-size:1.5rem; letter-spacing:-.02em; }
+.style-meta { font-size:.75rem; color:var(--text-2); margin-top:4px; }
+
+/* ── MISC ─── */
+.divider { height:1px; background:var(--border); margin:14px 0; }
+.flex-row { display:flex; align-items:center; gap:8px; }
+.space-between { display:flex; align-items:center; justify-content:space-between; }
+.mb8 { margin-bottom:8px; }
+.mb12 { margin-bottom:12px; }
+.mb16 { margin-bottom:16px; }
+.text-sm { font-size:.75rem; color:var(--text-2); }
+.text-xs { font-size:.7rem; color:var(--text-3); }
+.truncate { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px; display:inline-block; vertical-align:bottom; }
+.lock-icon { font-size:.9rem; color:var(--locked); }
+
+/* ── STATUS DOT ─── */
+.status-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.dot-success { background:var(--success); }
+.dot-warn    { background:#D97706; }
+.dot-danger  { background:var(--danger); }
+.dot-accent  { background:var(--accent); }
+
+/* ── ROLE SWITCHER (demo bar) ─── */
+.demo-bar {
+  background:var(--text); color:#fff;
+  padding:8px 24px; display:flex; align-items:center; gap:12px;
+  font-size:.72rem;
+}
+.demo-bar span { color:rgba(255,255,255,.5); }
+.role-btn {
+  padding:3px 12px; border-radius:20px; border:1px solid rgba(255,255,255,.25);
+  background:transparent; color:rgba(255,255,255,.7);
+  font-size:.72rem; cursor:pointer; font-family:'DM Sans',sans-serif;
+  transition:all .15s;
+}
+.role-btn.active { background:#fff; color:var(--text); font-weight:600; }
+.role-btn:hover { background:rgba(255,255,255,.15); color:#fff; }
+
+/* ── REJECTION FLOW PANEL ─── */
+.rejection-warning {
+  padding:10px 12px; background:var(--danger-bg);
+  border-radius:var(--r); border:1px solid #FCA5A5;
+  font-size:.75rem; color:var(--danger); margin-bottom:12px;
+}
+.approval-warning {
+  padding:10px 12px; background:var(--warn-bg);
+  border-radius:var(--r); border:1px solid #FCD34D;
+  font-size:.75rem; color:var(--warn); margin-bottom:12px;
+}
+</style>
+</head>
+<body>
+
+<!-- DEMO ROLE SWITCHER -->
+<div class="demo-bar">
+  <span>Preview as:</span>
+  <button class="role-btn active" onclick="switchRole('merch', this)">Merchandiser</button>
+  <button class="role-btn" onclick="switchRole('factory', this)">Factory</button>
+  <button class="role-btn" onclick="switchRole('qa', this)">QA</button>
+  <button class="role-btn" onclick="switchRole('tech', this)">Tech Team</button>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand"><div class="dot"></div>AXENTRIX</div>
+  <div class="topbar-search">
+    <span class="si">⌕</span>
+    <input type="text" placeholder="Search style number…" oninput="handleSearch(this.value)">
+  </div>
+  <div class="topbar-right">
+    <div id="topbar-role-tag" class="topbar-role-tag">Merchandiser</div>
+    <!-- Bell -->
+    <div class="icon-btn" onclick="toggleBell(event)">
+      🔔
+      <div class="notif-badge" id="bell-count">5</div>
+      <div class="dropdown-menu" id="bell-dd" style="min-width:280px; right:0;">
+        <div class="dd-label">Notifications</div>
+        <div class="notif-item"><div class="notif-dot dot-warn"></div><div><div class="notif-title">1st Fit awaiting approval</div><div class="notif-sub">HCO-SS25-001 · Fitting · 2h ago</div></div></div>
+        <div class="notif-item"><div class="notif-dot dot-danger"></div><div><div class="notif-title">Fabric rejected — action required</div><div class="notif-sub">HCO-SS25-003 · 4h ago</div></div></div>
+        <div class="notif-item"><div class="notif-dot dot-accent"></div><div><div class="notif-title">TNA milestone overdue</div><div class="notif-sub">HCO-SS25-007 · PP dispatch · yesterday</div></div></div>
+        <div class="notif-item"><div class="notif-dot dot-success"></div><div><div class="notif-title">2nd Fit approved</div><div class="notif-sub">HCO-SS25-002 · Tech: J. Chen · 1d ago</div></div></div>
+        <div class="notif-item"><div class="notif-dot dot-warn"></div><div><div class="notif-title">Trims in-house date in 2 days</div><div class="notif-sub">HCO-SS25-005 · TNA alert</div></div></div>
+        <div style="padding:8px 12px;"><button class="btn btn-ghost btn-sm" style="width:100%">View all</button></div>
+      </div>
+    </div>
+    <!-- Avatar dropdown -->
+    <div style="position:relative">
+      <div class="avatar" onclick="toggleAvatar(event)" id="avatar-btn">MR</div>
+      <div class="dropdown-menu" id="avatar-dd">
+        <div style="padding:10px 12px 6px">
+          <div style="font-size:.85rem;font-weight:500">Maya Rodriguez</div>
+          <div style="font-size:.72rem;color:var(--text-3)">maya@hollisterhco.com</div>
+        </div>
+        <div class="dd-sep"></div>
+        <div class="dd-label">Settings</div>
+        <div class="dd-item">☀ Dark / light mode</div>
+        <div class="dd-item">🔑 Change password</div>
+        <div class="dd-item">🎨 Personalization</div>
+        <div class="dd-item">💬 Support</div>
+        <div class="dd-sep"></div>
+        <div class="dd-item" onclick="switchRole('merch', null)">↔ Change role</div>
+        <div class="dd-sep"></div>
+        <div class="dd-item" style="color:var(--danger)">⬡ Logout</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="nav-section-label">Overview</div>
+    <div class="nav-item active" onclick="showPage('dashboard', this)"><span class="ni">⊞</span>Dashboard</div>
+    <div class="nav-item" onclick="showPage('styles', this)"><span class="ni">◈</span>All styles <span class="badge-count" id="styles-count">142</span></div>
+    <div class="nav-item" id="nav-approvals" onclick="showPage('approvals', this)"><span class="ni">✓</span>Approvals <span class="badge-count">5</span></div>
+    <div class="nav-item" onclick="showPage('tna', this)"><span class="ni">◷</span>TNA tracker</div>
+    <div class="nav-item" onclick="showPage('shipments', this)"><span class="ni">⬡</span>Shipments</div>
+    <div class="nav-section-label">Modules</div>
+    <div class="nav-item" onclick="showPage('fabric', this)"><span class="ni">◻</span>Fabric</div>
+    <div class="nav-item" onclick="showPage('fitting', this)"><span class="ni">◎</span>Fitting</div>
+    <div class="nav-item" onclick="showPage('trims', this)"><span class="ni">⬟</span>Trims</div>
+    <div class="nav-item" id="nav-costing" onclick="showPage('costing', this)"><span class="ni">$</span>Costing</div>
+    <div class="nav-item" onclick="showPage('style-detail', this)"><span class="ni">⊕</span>Style detail</div>
+    <div style="flex:1"></div>
+    <div class="sidebar-bottom">
+      <strong id="sidebar-role-name">Merchandiser</strong>
+      <span id="sidebar-role-desc">Full access · SS25</span>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main" id="main-content">
+
+    <!-- ═══════════════ DASHBOARD ═══════════════ -->
+    <div class="page active" id="page-dashboard">
+      <h1 class="page-title">Good morning, Maya.</h1>
+      <p class="page-sub" id="dashboard-sub">SS25 season · 142 active styles · Last updated just now</p>
+
+      <div class="g4 mb16">
+        <div class="kpi kpi-accent"><div class="kpi-label">Active styles</div><div class="kpi-value">142</div><div class="kpi-sub">↑ 8 this week</div></div>
+        <div class="kpi kpi-warn"><div class="kpi-label">Pending approvals</div><div class="kpi-value" id="kpi-pending">18</div><div class="kpi-sub">5 high urgency</div></div>
+        <div class="kpi kpi-danger"><div class="kpi-label">TNA delays</div><div class="kpi-value">7</div><div class="kpi-sub">2 critical</div></div>
+        <div class="kpi kpi-accent"><div class="kpi-label">In transit</div><div class="kpi-value">24</div><div class="kpi-sub">3 arriving today</div></div>
+      </div>
+
+      <!-- Module tiles -->
+      <div class="section-title mb12" id="module-section-title">Dashboard modules</div>
+      <div class="g5 mb16" id="module-tiles">
+        <div class="card" style="cursor:pointer;text-align:center;padding:20px 10px" onclick="showPage('fabric', null)">
+          <div style="font-size:1.3rem;margin-bottom:6px">◻</div>
+          <div style="font-weight:600;font-size:.85rem;margin-bottom:6px">Fabric</div>
+          <span class="badge b-pending">12 pending</span>
+          <div class="text-xs" style="margin-top:8px">Mill · source · validation</div>
+        </div>
+        <div class="card" style="cursor:pointer;text-align:center;padding:20px 10px" onclick="showPage('fitting', null)">
+          <div style="font-size:1.3rem;margin-bottom:6px">◎</div>
+          <div style="font-weight:600;font-size:.85rem;margin-bottom:6px">Fitting</div>
+          <span class="badge b-approved">6 approved</span>
+          <div class="text-xs" style="margin-top:8px">1st–3rd fit · sealer</div>
+        </div>
+        <div class="card" style="cursor:pointer;text-align:center;padding:20px 10px">
+          <div style="font-size:1.3rem;margin-bottom:6px">⬟</div>
+          <div style="font-weight:600;font-size:.85rem;margin-bottom:6px">Trims</div>
+          <span class="badge b-rejected">2 rejected</span>
+          <div class="text-xs" style="margin-top:8px">Details · in-house · approval</div>
+        </div>
+        <div class="card" style="cursor:pointer;text-align:center;padding:20px 10px" id="costing-tile">
+          <div style="font-size:1.3rem;margin-bottom:6px">$</div>
+          <div style="font-weight:600;font-size:.85rem;margin-bottom:6px">Costing</div>
+          <span class="badge b-info">Merch only</span>
+          <div class="text-xs" style="margin-top:8px">FOB · breakdown · editable</div>
+        </div>
+        <div class="card" style="cursor:pointer;text-align:center;padding:20px 10px" onclick="showPage('tna', null)">
+          <div style="font-size:1.3rem;margin-bottom:6px">◷</div>
+          <div style="font-weight:600;font-size:.85rem;margin-bottom:6px">TNA</div>
+          <span class="badge b-rejected">7 delayed</span>
+          <div class="text-xs" style="margin-top:8px">Timeline · deadlines · flags</div>
+        </div>
+      </div>
+
+      <div class="g2 mb16">
+        <div class="card">
+          <div class="card-title">Recent styles</div>
+          <table>
+            <thead><tr><th>Style</th><th>Dept</th><th>Stage</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><a href="#" onclick="showPage('style-detail',null);return false" style="color:var(--accent);font-weight:500">HCO-SS25-001</a></td><td class="td-muted">Dresses</td><td class="td-muted">1st Fit</td><td><span class="badge b-pending">Pending</span></td></tr>
+              <tr><td style="font-weight:500">HCO-SS25-002</td><td class="td-muted">Tops</td><td class="td-muted">Sampling</td><td><span class="badge b-approved">Approved</span></td></tr>
+              <tr><td style="font-weight:500">HCO-SS25-003</td><td class="td-muted">Bottoms</td><td class="td-muted">Fabric</td><td><span class="badge b-rejected">Rejected</span></td></tr>
+              <tr><td style="font-weight:500">HCO-SS25-004</td><td class="td-muted">Dresses</td><td class="td-muted">Shipment</td><td><span class="badge b-info">In transit</span></td></tr>
+              <tr><td style="font-weight:500">HCO-SS25-005</td><td class="td-muted">Tops</td><td class="td-muted">2nd Fit</td><td><span class="badge b-pending">Pending</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title" id="pending-panel-title">Pending approvals</div>
+          <div id="pending-list">
+            <div class="notif-item" onclick="showPage('style-detail',null)"><div class="notif-dot dot-warn"></div><div style="flex:1"><div class="notif-title">1st Fit — HCO-SS25-001</div><div class="notif-sub">Submitted 2h ago · Fitting</div></div><button class="btn btn-primary btn-sm">Review</button></div>
+            <div class="notif-item"><div class="notif-dot dot-warn"></div><div style="flex:1"><div class="notif-title">Fabric — HCO-SS25-005</div><div class="notif-sub">Submitted 5h ago · TNA urgent</div></div><button class="btn btn-primary btn-sm">Review</button></div>
+            <div class="notif-item"><div class="notif-dot dot-danger"></div><div style="flex:1"><div class="notif-title">Proto sample — HCO-SS25-007</div><div class="notif-sub">Overdue 1 day · TNA alert</div></div><button class="btn btn-primary btn-sm">Review</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">TNA snapshot — all active styles</div>
+        <div class="tna-row"><div class="tna-label">HCO-SS25-001</div><div class="tna-track"><div class="tna-seg" style="background:var(--success)"></div><div class="tna-seg" style="background:var(--success)"></div><div class="tna-seg" style="background:#D97706"></div><div class="tna-seg" style="background:var(--locked-bg)"></div><div class="tna-seg" style="background:var(--locked-bg)"></div></div><span class="badge b-pending" style="margin-left:8px">Fitting</span></div>
+        <div class="tna-row"><div class="tna-label">HCO-SS25-002</div><div class="tna-track"><div class="tna-seg" style="background:var(--success)"></div><div class="tna-seg" style="background:var(--success)"></div><div class="tna-seg" style="background:var(--success)"></div><div class="tna-seg" style="background:var(--success)"></div><div class="tna-seg" style="background:#D97706"></div></div><span class="badge b-approved" style="margin-left:8px">Sampling</span></div>
+        <div class="tna-row"><div class="tna-label">HCO-SS25-003</div><div class="tna-track"><div class="tna-seg" style="background:var(--danger)"></div><div class="tna-seg" style="background:var(--locked-bg)"></div><div class="tna-seg" style="background:var(--locked-bg)"></div><div class="tna-seg" style="background:var(--locked-bg)"></div><div class="tna-seg" style="background:var(--locked-bg)"></div></div><span class="badge b-rejected" style="margin-left:8px">Fabric</span></div>
+        <div class="tna-row"><div class="tna-label">HCO-SS25-004</div><div class="tna-track"><div class="tna-seg" style="background:var(--success)"></div><div class="tna-seg" style="background:var(--success)"></div><div class="tna-seg" style="background:var(--success)"></div><div class="tna-seg" style="background:var(--success)"></div><div class="tna-seg" style="background:var(--accent)"></div></div><span class="badge b-info" style="margin-left:8px">Shipment</span></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ STYLE DETAIL ═══════════════ -->
+    <div class="page" id="page-style-detail">
+      <div class="style-header">
+        <div>
+          <div class="style-id">HCO-SS25-001</div>
+          <div class="style-meta">Dresses · SS25 · Factory: ABC Apparel Ltd · Created 01 Mar 2025</div>
+        </div>
+        <div class="flex-row" style="flex-wrap:wrap;gap:8px">
+          <span class="badge b-pending">Fitting — 2nd Fit pending</span>
+          <button class="btn btn-ghost btn-sm" id="edit-style-btn">Edit style</button>
+          <button class="btn btn-primary btn-sm" id="submit-approval-btn">Submit for approval</button>
+        </div>
+      </div>
+
+      <div class="tab-bar" id="style-tabs">
+        <div class="tab active" onclick="switchStyleTab('fabric', this)">Fabric</div>
+        <div class="tab" onclick="switchStyleTab('fitting', this)">Fitting</div>
+        <div class="tab" onclick="switchStyleTab('trims', this)">Trims</div>
+        <div class="tab" id="costing-tab" onclick="switchStyleTab('costing', this)">Costing</div>
+        <div class="tab" onclick="switchStyleTab('tna-tab', this)">TNA</div>
+        <div class="tab" onclick="switchStyleTab('sampling', this)">Sampling</div>
+        <div class="tab" onclick="switchStyleTab('shipment', this)">Shipment</div>
+        <div class="tab" onclick="switchStyleTab('color-approvals', this)">Color approvals</div>
+        <div class="tab" onclick="switchStyleTab('history', this)">Approval history</div>
+      </div>
+
+      <!-- FABRIC TAB -->
+      <div id="stab-fabric" class="g2">
+        <div class="card">
+          <div class="card-title">Fabric details</div>
+          <table>
+            <tbody>
+              <tr><td class="td-muted" style="width:40%">Fabric name</td><td style="font-weight:500">Cotton Poplin 60s</td></tr>
+              <tr><td class="td-muted">Mill / source</td><td>Haji Tex · Bangladesh</td></tr>
+              <tr><td class="td-muted">Composition</td><td>100% Cotton</td></tr>
+              <tr><td class="td-muted">GSM</td><td>110 gsm</td></tr>
+              <tr><td class="td-muted">Colour ref</td><td>Pantone 11-4201 TCX</td></tr>
+              <tr><td class="td-muted">Validation status</td><td><span class="badge b-approved">Approved</span></td></tr>
+              <tr><td class="td-muted">Validated by</td><td>J. Chen · Tech team · 12 Mar 14:22</td></tr>
+              <tr><td class="td-muted">Comments</td><td class="text-sm">GSM and hand-feel confirmed. Proceed to bulk.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">Color approvals (parallel track)</div>
+          <div class="stage-row approved"><div><div class="stage-name">Lab dip — Attempt 2</div><div class="stage-meta">Approved by M. Rodriguez · 14 Mar</div></div><span class="badge b-approved">Approved</span></div>
+          <div class="stage-row approved"><div><div class="stage-name">Shade variation</div><div class="stage-meta">Tolerance accepted · 16 Mar</div></div><span class="badge b-approved">Approved</span></div>
+          <div class="stage-row pending"><div><div class="stage-name">Strike-off / print</div><div class="stage-meta">Submitted 19 Mar · awaiting Merch review</div></div><span class="badge b-pending">Pending</span></div>
+          <div class="stage-row locked"><div><div class="stage-name locked">Bulk fabric approval</div><div class="stage-meta" style="color:var(--locked)">Awaiting strike-off approval</div></div><span class="lock-icon">🔒</span></div>
+        </div>
+      </div>
+
+      <!-- FITTING TAB -->
+      <div id="stab-fitting" style="display:none">
+        <div class="g2">
+          <div>
+            <div class="card mb12">
+              <div class="card-title">Fitting stages</div>
+              <div class="stage-row approved"><div><div class="stage-name">1st Fit</div><div class="stage-meta">Approved · 15 Mar · J. Chen (Tech team)</div></div><span class="badge b-approved">Approved</span></div>
+              <div class="stage-row pending"><div><div class="stage-name">2nd Fit</div><div class="stage-meta">Submitted 20 Mar 09:15 · awaiting Tech review</div></div><span class="badge b-pending">Pending</span></div>
+              <div class="stage-row locked" title="Unlocks when 2nd Fit is approved"><div><div class="stage-name" style="color:var(--locked)">3rd Fit</div><div class="stage-meta" style="color:var(--locked)">Locked — awaiting 2nd Fit approval</div></div><span class="lock-icon">🔒</span></div>
+              <div class="stage-row locked" title="Unlocks when 3rd Fit is approved"><div><div class="stage-name" style="color:var(--locked)">Sealer sample</div><div class="stage-meta" style="color:var(--locked)">Locked</div></div><span class="lock-icon">🔒</span></div>
+            </div>
+          </div>
+          <!-- APPROVAL PANEL -->
+          <div class="ap-panel" id="approval-panel">
+            <div class="space-between mb12">
+              <div style="font-family:'DM Serif Display',serif;font-size:1.1rem">Approval panel</div>
+              <span class="badge b-pending">2nd Fit · Pending</span>
+            </div>
+            <div class="approval-warning" id="ap-status-banner">
+              <strong>Awaiting Tech team decision</strong><br>
+              Submitted by Maya R. · 20 Mar 09:15
+            </div>
+            <div class="mb12">
+              <div class="card-title">Submitted materials</div>
+              <div class="ap-submitted-files">
+                <div class="file-chip">📄 fit_sheet_2nd.pdf</div>
+                <div class="file-chip">🖼 sample_front.jpg</div>
+                <div class="file-chip">🖼 sample_back.jpg</div>
+                <div class="file-chip">📏 measurements.xlsx</div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <!-- Tech-only actions -->
+            <div id="tech-actions">
+              <div class="field mb12">
+                <label>Comment (required if rejecting)</label>
+                <textarea rows="3" placeholder="Add review notes…" id="ap-comment"></textarea>
+              </div>
+              <div class="mb12">
+                <div class="card-title">Upload reference image (optional)</div>
+                <div class="upload-zone" onclick="this.querySelector('input').click()">
+                  <input type="file" style="display:none" multiple>
+                  <div class="icon">⬆</div>
+                  <div class="label">Drop files or click to browse</div>
+                  <div class="hint">JPG, PNG, PDF · max 20MB</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-primary" style="flex:1" onclick="doApprove()">✓ Approve</button>
+                <button class="btn btn-danger"  style="flex:1" onclick="doReject()">✕ Reject</button>
+              </div>
+              <div style="margin-top:8px">
+                <button class="btn btn-ghost" style="width:100%;font-size:.75rem" onclick="doInfoRequest()">? Request more information</button>
+              </div>
+            </div>
+            <div id="non-tech-notice" style="display:none;padding:12px;background:var(--locked-bg);border-radius:var(--r);font-size:.78rem;color:var(--locked);text-align:center">
+              Approval actions are available to Tech team only.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRIMS TAB -->
+      <div id="stab-trims" style="display:none">
+        <div class="card">
+          <div class="card-title">Trim items — HCO-SS25-001</div>
+          <table>
+            <thead><tr><th>Trim</th><th>Supplier</th><th>Expected in-house</th><th>Actual</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td style="font-weight:500">Main label</td><td class="td-muted">Woven Label Co.</td><td class="td-muted">20 Mar</td><td class="td-muted">19 Mar</td><td><span class="badge b-approved">Approved</span></td></tr>
+              <tr><td style="font-weight:500">YKK Zip 20cm</td><td class="td-muted">YKK Corp</td><td class="td-muted">22 Mar</td><td class="td-muted">—</td><td><span class="badge b-pending">Pending</span></td></tr>
+              <tr><td style="font-weight:500">Care label</td><td class="td-muted">LabelTech</td><td class="td-muted">18 Mar</td><td class="td-muted">21 Mar</td><td><span class="badge b-rejected">Rejected</span></td></tr>
+              <tr><td style="font-weight:500">Button set</td><td class="td-muted">ShineTrim</td><td class="td-muted">25 Mar</td><td class="td-muted">—</td><td><span class="badge b-locked">Locked</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- COSTING TAB -->
+      <div id="stab-costing" style="display:none">
+        <div id="costing-merch-view">
+          <div class="g2">
+            <div class="card">
+              <div class="card-title">Cost breakdown</div>
+              <table>
+                <tbody>
+                  <tr><td class="td-muted">Target FOB (USD)</td><td style="font-weight:600">$14.50</td></tr>
+                  <tr><td class="td-muted">Fabric cost</td><td>$5.20</td></tr>
+                  <tr><td class="td-muted">Trims cost</td><td>$0.85</td></tr>
+                  <tr><td class="td-muted">CM cost</td><td>$3.40</td></tr>
+                  <tr><td class="td-muted">Embellishment</td><td>$1.10</td></tr>
+                  <tr><td class="td-muted">Testing</td><td>$0.50</td></tr>
+                  <tr><td class="td-muted">Total cost</td><td style="font-weight:600">$11.05</td></tr>
+                  <tr><td class="td-muted">Margin</td><td style="font-weight:600;color:var(--success)">23.8%</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card">
+              <div class="card-title">Edit costing</div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div class="field"><label>Target FOB (USD)</label><input type="number" value="14.50" step="0.01"></div>
+                <div class="field"><label>Fabric cost</label><input type="number" value="5.20" step="0.01"></div>
+                <div class="field"><label>CM cost</label><input type="number" value="3.40" step="0.01"></div>
+                <div class="field"><label>Cost notes</label><textarea rows="2" placeholder="Negotiation notes…"></textarea></div>
+                <button class="btn btn-primary">Save changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="costing-hidden" style="display:none">
+          <div style="padding:40px;text-align:center;color:var(--text-3)">
+            <div style="font-size:2rem;margin-bottom:8px">🔒</div>
+            <div style="font-size:.9rem;font-weight:500;color:var(--text-2)">Costing data is restricted to Merchandisers only.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TNA TAB -->
+      <div id="stab-tna-tab" style="display:none">
+        <div class="card">
+          <div class="card-title">TNA milestones — HCO-SS25-001</div>
+          <table>
+            <thead><tr><th>Milestone</th><th>Planned date</th><th>Actual date</th><th>Responsible</th><th>Status</th><th>Delay</th></tr></thead>
+            <tbody>
+              <tr><td>Fabric approval</td><td class="td-muted">08 Mar</td><td class="td-muted">12 Mar</td><td><span class="role-pill r-tech">Tech</span></td><td><span class="badge b-approved">Done</span></td><td style="color:var(--warn)">+4d</td></tr>
+              <tr><td>1st Fit</td><td class="td-muted">14 Mar</td><td class="td-muted">15 Mar</td><td><span class="role-pill r-tech">Tech</span></td><td><span class="badge b-approved">Done</span></td><td style="color:var(--warn)">+1d</td></tr>
+              <tr><td>2nd Fit</td><td class="td-muted">20 Mar</td><td class="td-muted">—</td><td><span class="role-pill r-tech">Tech</span></td><td><span class="badge b-pending">Pending</span></td><td>—</td></tr>
+              <tr><td>PP sample dispatch</td><td class="td-muted">01 Apr</td><td class="td-muted">—</td><td><span class="role-pill r-factory">Factory</span></td><td><span class="badge b-locked">Locked</span></td><td>—</td></tr>
+              <tr><td>Ex-factory</td><td class="td-muted">15 May</td><td class="td-muted">—</td><td><span class="role-pill r-factory">Factory</span></td><td><span class="badge b-locked">Locked</span></td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SAMPLING TAB -->
+      <div id="stab-sampling" style="display:none">
+        <div class="card">
+          <div class="card-title">Sampling lifecycle tracker</div>
+          <div class="stage-row approved"><div><div class="stage-name">Proto sample</div><div class="stage-meta">Approved · 05 Mar · J. Chen</div></div><span class="badge b-approved">Approved</span></div>
+          <div class="stage-row approved"><div><div class="stage-name">SMS (Salesman sample)</div><div class="stage-meta">Approved · 12 Mar · S. Park</div></div><span class="badge b-approved">Approved</span></div>
+          <div class="stage-row pending"><div><div class="stage-name">PP (Pre-production)</div><div class="stage-meta">Submitted 20 Mar · awaiting Tech review</div></div><span class="badge b-pending">Pending</span></div>
+          <div class="stage-row locked" title="Unlocks when PP is approved"><div><div class="stage-name" style="color:var(--locked)">TOP (Top of production)</div><div class="stage-meta" style="color:var(--locked)">Locked</div></div><span class="lock-icon">🔒</span></div>
+          <div class="stage-row locked"><div><div class="stage-name" style="color:var(--locked)">Sealer sample</div><div class="stage-meta" style="color:var(--locked)">Locked</div></div><span class="lock-icon">🔒</span></div>
+        </div>
+      </div>
+
+      <!-- SHIPMENT TAB -->
+      <div id="stab-shipment" style="display:none">
+        <div class="card">
+          <div class="card-title">Shipment tracking</div>
+          <table>
+            <tbody>
+              <tr><td class="td-muted">PO number</td><td style="font-weight:500">PO-2025-HCO-001</td></tr>
+              <tr><td class="td-muted">Order qty</td><td>2,400 units</td></tr>
+              <tr><td class="td-muted">Shipment method</td><td>Sea freight</td></tr>
+              <tr><td class="td-muted">Ex-factory date</td><td>15 May 2025</td></tr>
+              <tr><td class="td-muted">Booking ref</td><td>—</td></tr>
+              <tr><td class="td-muted">ETD</td><td>—</td></tr>
+              <tr><td class="td-muted">ETA</td><td>—</td></tr>
+              <tr><td class="td-muted">Status</td><td><span class="badge b-locked">Not dispatched</span></td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:14px;padding:12px;background:var(--locked-bg);border-radius:var(--r);font-size:.78rem;color:var(--locked)">
+            Shipment module unlocks after Sealer sample is approved.
+          </div>
+        </div>
+      </div>
+
+      <!-- COLOR APPROVALS TAB -->
+      <div id="stab-color-approvals" style="display:none">
+        <div class="g2">
+          <div>
+            <div class="card">
+              <div class="card-title">Color approval items</div>
+              <div class="stage-row approved"><div><div class="stage-name">Lab dip — Attempt 2</div><div class="stage-meta">Approved · M. Rodriguez · 14 Mar</div></div><span class="badge b-approved">Approved</span></div>
+              <div class="stage-row approved"><div><div class="stage-name">Shade variation</div><div class="stage-meta">Tolerance accepted · 16 Mar</div></div><span class="badge b-approved">Approved</span></div>
+              <div class="stage-row pending"><div><div class="stage-name">Strike-off (Flora Print)</div><div class="stage-meta">Submitted 19 Mar · Merch review pending</div></div><span class="badge b-pending">Pending</span></div>
+              <div class="stage-row locked"><div><div class="stage-name" style="color:var(--locked)">Bulk fabric</div><div class="stage-meta" style="color:var(--locked)">Awaiting strike-off approval</div></div><span class="lock-icon">🔒</span></div>
+            </div>
+          </div>
+          <div class="ap-panel" id="color-ap-panel">
+            <div class="space-between mb12">
+              <div style="font-family:'DM Serif Display',serif;font-size:1.1rem">Color review</div>
+              <span class="badge b-pending">Strike-off · Pending</span>
+            </div>
+            <div class="approval-warning">
+              Factory submitted for Merch / colorist review.<br>
+              Flora Print strike-off · 19 Mar
+            </div>
+            <div class="ap-submitted-files mb12">
+              <div class="file-chip">🖼 strikeoff_front.jpg</div>
+              <div class="file-chip">🖼 strikeoff_detail.jpg</div>
+            </div>
+            <div id="merch-color-actions">
+              <div class="field mb12"><label>Rejection reason (required if rejecting)</label><textarea rows="2" placeholder="e.g. Color registration off — shift 2mm left"></textarea></div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-primary" style="flex:1">✓ Approve color</button>
+                <button class="btn btn-danger"  style="flex:1">✕ Reject</button>
+              </div>
+            </div>
+            <div id="non-merch-color" style="display:none;padding:12px;background:var(--locked-bg);border-radius:var(--r);font-size:.78rem;color:var(--locked);text-align:center">
+              Color approvals are managed by the Merchandiser / colorist.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY TAB -->
+      <div id="stab-history" style="display:none">
+        <div class="card">
+          <div class="card-title">Approval history log — HCO-SS25-001</div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Stage</th><th>Module</th><th>Decision</th><th>By</th><th>Date &amp; time</th><th>Comments</th><th>Files</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight:500">1st Fit</td>
+                  <td class="td-muted">Fitting</td>
+                  <td><span class="badge b-approved">Approved</span></td>
+                  <td><span class="role-pill r-tech">Tech</span> <span class="td-muted" style="margin-left:4px">J. Chen</span></td>
+                  <td class="td-muted" style="white-space:nowrap">15 Mar · 14:22</td>
+                  <td><span class="truncate" title="Fit is clean across all sizes. Proceed to 2nd Fit.">Fit is clean across all sizes. Proceed to 2nd Fit.</span></td>
+                  <td><span style="color:var(--accent);cursor:pointer" onclick="openModal()">📎 2</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500">Fabric</td>
+                  <td class="td-muted">Fabric</td>
+                  <td><span class="badge b-approved">Approved</span></td>
+                  <td><span class="role-pill r-tech">Tech</span> <span class="td-muted" style="margin-left:4px">S. Park</span></td>
+                  <td class="td-muted" style="white-space:nowrap">12 Mar · 11:05</td>
+                  <td><span class="text-sm">GSM and hand-feel confirmed.</span></td>
+                  <td><span class="td-muted">—</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500">Lab dip</td>
+                  <td class="td-muted">Color</td>
+                  <td><span class="badge b-rejected">Rejected</span></td>
+                  <td><span class="role-pill r-merch">Merch</span> <span class="td-muted" style="margin-left:4px">M. Rodriguez</span></td>
+                  <td class="td-muted" style="white-space:nowrap">10 Mar · 16:40</td>
+                  <td><span class="truncate" title="Attempt 1 too warm. Needs to shift cooler — ref Pantone 12-0145.">Attempt 1 too warm. Needs to shift cooler...</span></td>
+                  <td><span style="color:var(--accent);cursor:pointer" onclick="openModal()">📎 1</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500">Lab dip</td>
+                  <td class="td-muted">Color</td>
+                  <td><span class="badge b-approved">Approved</span></td>
+                  <td><span class="role-pill r-merch">Merch</span> <span class="td-muted" style="margin-left:4px">M. Rodriguez</span></td>
+                  <td class="td-muted" style="white-space:nowrap">14 Mar · 09:18</td>
+                  <td><span class="text-sm">Attempt 2 matches reference standard.</span></td>
+                  <td><span class="td-muted">—</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500">2nd Fit</td>
+                  <td class="td-muted">Fitting</td>
+                  <td><span class="badge b-pending">Pending</span></td>
+                  <td><span class="td-muted">Awaiting review</span></td>
+                  <td class="td-muted" style="white-space:nowrap">20 Mar · 09:15</td>
+                  <td><span class="td-muted">—</span></td>
+                  <td><span style="color:var(--accent);cursor:pointer" onclick="openModal()">📎 4</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top:8px;font-size:.7rem;color:var(--text-3)">Hover comments column for full text · Click 📎 to preview attachments · Records are immutable</div>
+        </div>
+      </div>
+    </div><!-- /page-style-detail -->
+
+    <!-- ═══════════════ TECH DASHBOARD ═══════════════ -->
+    <div class="page" id="page-approvals">
+      <h1 class="page-title">Approvals inbox</h1>
+      <p class="page-sub">Pending stage decisions · Sorted by TNA urgency</p>
+      <div class="g3">
+        <div>
+          <div class="card-title">⏳ Pending</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="card" style="cursor:pointer" onclick="showPage('style-detail',null)">
+              <div class="space-between mb8"><span style="font-weight:600;font-size:.85rem">2nd Fit · HCO-SS25-001</span><span class="badge b-pending">Pending</span></div>
+              <div class="text-sm mb8">Fitting · Submitted 20 Mar · TNA today</div>
+              <button class="btn btn-primary btn-sm" style="width:100%">Review &rarr;</button>
+            </div>
+            <div class="card" style="cursor:pointer">
+              <div class="space-between mb8"><span style="font-weight:600;font-size:.85rem">Fabric · HCO-SS25-005</span><span class="badge b-pending">Pending</span></div>
+              <div class="text-sm mb8">Fabric · Submitted 19 Mar · TNA +1d</div>
+              <button class="btn btn-primary btn-sm" style="width:100%">Review &rarr;</button>
+            </div>
+            <div class="card" style="cursor:pointer">
+              <div class="space-between mb8"><span style="font-weight:600;font-size:.85rem">PP Sample · HCO-SS25-007</span><span class="badge b-pending">Pending</span></div>
+              <div class="text-sm mb8">Sampling · Submitted 18 Mar · Overdue</div>
+              <button class="btn btn-primary btn-sm" style="width:100%">Review &rarr;</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card-title">✓ Recently approved</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="card"><div class="space-between"><span style="font-weight:600;font-size:.85rem">1st Fit · HCO-SS25-001</span><span class="badge b-approved">Approved</span></div><div class="text-sm" style="margin-top:4px">15 Mar · J. Chen</div></div>
+            <div class="card"><div class="space-between"><span style="font-weight:600;font-size:.85rem">Proto · HCO-SS25-002</span><span class="badge b-approved">Approved</span></div><div class="text-sm" style="margin-top:4px">14 Mar · S. Park</div></div>
+            <div class="card"><div class="space-between"><span style="font-weight:600;font-size:.85rem">Fabric · HCO-SS25-004</span><span class="badge b-approved">Approved</span></div><div class="text-sm" style="margin-top:4px">12 Mar · J. Chen</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="card-title">✕ Rejected — action pending</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="card" style="border-left:3px solid var(--danger)">
+              <div class="space-between mb8"><span style="font-weight:600;font-size:.85rem">Fabric · HCO-SS25-003</span><span class="badge b-rejected">Rejected</span></div>
+              <div style="font-size:.75rem;color:var(--danger);margin-bottom:4px">"GSM does not meet spec — 110gsm required, 98gsm submitted"</div>
+              <div class="text-sm">Awaiting Merch resubmission</div>
+            </div>
+            <div class="card" style="border-left:3px solid var(--danger)">
+              <div class="space-between mb8"><span style="font-weight:600;font-size:.85rem">Trims · HCO-SS25-006</span><span class="badge b-rejected">Rejected</span></div>
+              <div style="font-size:.75rem;color:var(--danger);margin-bottom:4px">"Care label content incorrect — needs country of origin"</div>
+              <div class="text-sm">Awaiting Merch resubmission</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ OTHER PAGES (placeholders) ═══════════════ -->
+    <div class="page" id="page-styles">
+      <h1 class="page-title">All styles</h1>
+      <p class="page-sub">SS25 · 142 active styles</p>
+      <div class="card">
+        <table>
+          <thead><tr><th>Style no.</th><th>Dept</th><th>Season</th><th>Factory</th><th>Stage</th><th>Status</th><th>TNA</th></tr></thead>
+          <tbody>
+            <tr><td><a href="#" onclick="showPage('style-detail',null);return false" style="color:var(--accent);font-weight:500">HCO-SS25-001</a></td><td>Dresses</td><td>SS25</td><td class="td-muted">ABC Apparel</td><td>Fitting</td><td><span class="badge b-pending">Pending</span></td><td class="td-muted">On track</td></tr>
+            <tr><td style="font-weight:500">HCO-SS25-002</td><td>Tops</td><td>SS25</td><td class="td-muted">ABC Apparel</td><td>Sampling</td><td><span class="badge b-approved">Approved</span></td><td class="td-muted">On track</td></tr>
+            <tr><td style="font-weight:500">HCO-SS25-003</td><td>Bottoms</td><td>SS25</td><td class="td-muted">XYZ Garments</td><td>Fabric</td><td><span class="badge b-rejected">Rejected</span></td><td style="color:var(--danger)">+4d delay</td></tr>
+            <tr><td style="font-weight:500">HCO-SS25-004</td><td>Dresses</td><td>SS25</td><td class="td-muted">FastTrack Mfg</td><td>Shipment</td><td><span class="badge b-info">In transit</span></td><td class="td-muted">On track</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="page" id="page-tna">
+      <h1 class="page-title">TNA tracker</h1>
+      <p class="page-sub">Timeline tracking across all active styles</p>
+      <div class="card">
+        <div class="card-title">Active milestones</div>
+        <div class="tna-row"><div class="tna-label">HCO-SS25-001</div><div class="tna-track"><div class="tna-seg" style="background:var(--success)"></div><div class="tna-seg" style="background:var(--success)"></div><div class="tna-seg" style="background:#D97706"></div><div class="tna-seg" style="background:var(--locked-bg)"></div><div class="tna-seg" style="background:var(--locked-bg)"></div></div></div>
+        <div class="tna-row"><div class="tna-label">HCO-SS25-002</div><div class="tna-track"><div class="tna-seg" style="background:var(--success)"></div><div class="tna-seg" style="background:var(--success)"></div><div class="tna-seg" style="background:var(--success)"></div><div class="tna-seg" style="background:var(--success)"></div><div class="tna-seg" style="background:#D97706"></div></div></div>
+        <div class="tna-row"><div class="tna-label">HCO-SS25-003</div><div class="tna-track"><div class="tna-seg" style="background:var(--danger)"></div><div class="tna-seg" style="background:var(--locked-bg)"></div><div class="tna-seg" style="background:var(--locked-bg)"></div><div class="tna-seg" style="background:var(--locked-bg)"></div><div class="tna-seg" style="background:var(--locked-bg)"></div></div></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-fabric">
+      <h1 class="page-title">Fabric module</h1>
+      <p class="page-sub">All fabric records across active styles</p>
+      <div class="card"><table><thead><tr><th>Style</th><th>Fabric name</th><th>Mill</th><th>GSM</th><th>Composition</th><th>Validation</th></tr></thead><tbody>
+        <tr><td style="font-weight:500">HCO-SS25-001</td><td>Cotton Poplin 60s</td><td class="td-muted">Haji Tex</td><td class="td-muted">110</td><td class="td-muted">100% Cotton</td><td><span class="badge b-approved">Approved</span></td></tr>
+        <tr><td style="font-weight:500">HCO-SS25-003</td><td>Poly Chiffon</td><td class="td-muted">SilkStar</td><td class="td-muted">98</td><td class="td-muted">100% Polyester</td><td><span class="badge b-rejected">Rejected</span></td></tr>
+        <tr><td style="font-weight:500">HCO-SS25-005</td><td>Denim 12oz</td><td class="td-muted">DenimCo</td><td class="td-muted">360</td><td class="td-muted">98% Cotton 2% Elast</td><td><span class="badge b-pending">Pending</span></td></tr>
+      </tbody></table></div>
+    </div>
+
+    <div class="page" id="page-fitting">
+      <h1 class="page-title">Fitting module</h1>
+      <p class="page-sub">Fitting stage status across all styles</p>
+      <div class="card"><table><thead><tr><th>Style</th><th>1st Fit</th><th>2nd Fit</th><th>3rd Fit</th><th>Sealer</th></tr></thead><tbody>
+        <tr><td><a href="#" onclick="showPage('style-detail',null);return false" style="color:var(--accent);font-weight:500">HCO-SS25-001</a></td><td><span class="badge b-approved">Approved</span></td><td><span class="badge b-pending">Pending</span></td><td><span class="badge b-locked">Locked</span></td><td><span class="badge b-locked">Locked</span></td></tr>
+        <tr><td style="font-weight:500">HCO-SS25-002</td><td><span class="badge b-approved">Approved</span></td><td><span class="badge b-approved">Approved</span></td><td><span class="badge b-approved">Approved</span></td><td><span class="badge b-pending">Pending</span></td></tr>
+      </tbody></table></div>
+    </div>
+
+    <div class="page" id="page-shipments">
+      <h1 class="page-title">Shipments</h1>
+      <p class="page-sub">Dispatch → delivery visibility</p>
+      <div class="card"><table><thead><tr><th>PO number</th><th>Style</th><th>Method</th><th>ETD</th><th>ETA</th><th>Status</th></tr></thead><tbody>
+        <tr><td style="font-weight:500">PO-2025-004</td><td>HCO-SS25-004</td><td>Sea</td><td class="td-muted">28 Apr</td><td class="td-muted">20 May</td><td><span class="badge b-info">In transit</span></td></tr>
+        <tr><td style="font-weight:500">PO-2025-002</td><td>HCO-SS25-002</td><td>Air</td><td class="td-muted">10 May</td><td class="td-muted">12 May</td><td><span class="badge b-locked">Not dispatched</span></td></tr>
+      </tbody></table></div>
+    </div>
+
+    <div class="page" id="page-costing">
+      <h1 class="page-title">Costing</h1>
+      <p class="page-sub" id="costing-page-sub">Full cost breakdown across styles</p>
+      <div id="costing-page-content">
+        <div class="card"><table><thead><tr><th>Style</th><th>Target FOB</th><th>Fabric</th><th>CM</th><th>Total cost</th><th>Margin</th></tr></thead><tbody>
+          <tr><td><a href="#" onclick="showPage('style-detail',null);return false" style="color:var(--accent);font-weight:500">HCO-SS25-001</a></td><td>$14.50</td><td>$5.20</td><td>$3.40</td><td>$11.05</td><td style="color:var(--success)">23.8%</td></tr>
+          <tr><td style="font-weight:500">HCO-SS25-002</td><td>$12.00</td><td>$4.10</td><td>$2.80</td><td>$9.40</td><td style="color:var(--success)">21.7%</td></tr>
+        </tbody></table></div>
+      </div>
+      <div id="costing-page-locked" style="display:none;padding:40px;text-align:center;color:var(--text-3)">
+        <div style="font-size:2rem;margin-bottom:8px">🔒</div>
+        <div style="font-size:.9rem;font-weight:500;color:var(--text-2)">Costing data is restricted to Merchandisers only.</div>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /layout -->
+
+<!-- ATTACHMENT MODAL -->
+<div class="modal-overlay" id="attachment-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Attachments — 1st Fit</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="padding:12px 14px;border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--bg)">
+        <span style="font-size:1.4rem">🖼</span>
+        <div><div style="font-weight:500;font-size:.82rem">sample_front_fit1.jpg</div><div class="text-xs">1.2 MB · 15 Mar 14:20</div></div>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto">Preview</button>
+      </div>
+      <div style="padding:12px 14px;border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--bg)">
+        <span style="font-size:1.4rem">📄</span>
+        <div><div style="font-weight:500;font-size:.82rem">measurement_sheet_1st.pdf</div><div class="text-xs">0.4 MB · 15 Mar 14:21</div></div>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto">Preview</button>
+      </div>
+    </div>
+    <div style="margin-top:16px;text-align:right"><button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button></div>
+  </div>
+</div>
+
+<!-- APPROVE SUCCESS MODAL -->
+<div class="modal-overlay" id="approve-modal" onclick="if(event.target===this)closeApproveModal()">
+  <div class="modal">
+    <div style="text-align:center;padding:20px 0">
+      <div style="font-size:2.5rem;margin-bottom:12px">✅</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:8px">Stage approved</div>
+      <div class="text-sm">2nd Fit has been approved. 3rd Fit is now unlocked.</div>
+      <div style="margin-top:16px"><button class="btn btn-primary" onclick="closeApproveModal()">Continue</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- REJECT CONFIRM MODAL -->
+<div class="modal-overlay" id="reject-modal" onclick="if(event.target===this)closeRejectModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Confirm rejection</div>
+      <button class="modal-close" onclick="closeRejectModal()">✕</button>
+    </div>
+    <div style="padding:14px;background:var(--danger-bg);border-radius:var(--r);margin-bottom:16px;font-size:.8rem;color:var(--danger)">
+      Stage will be returned to Merch. A "Action required" task will be assigned.
+    </div>
+    <div class="field mb12"><label>Rejection reason (required)</label><textarea rows="3" id="reject-comment" placeholder="Describe the issue clearly so Merch can act on it…"></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeRejectModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmReject()">Confirm rejection</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ────────────────────────────────────────────────────
+let currentRole = 'merch';
+const roleConfig = {
+  merch:   { label:'Merchandiser', tag:'Merchandiser', desc:'Full access · SS25', avatar:'MR', pendingCount:'18', kpiPending:'18' },
+  factory: { label:'Factory',      tag:'Factory',      desc:'ABC Apparel Ltd · SS25', avatar:'FA', pendingCount:'0', kpiPending:'—' },
+  qa:      { label:'QA',           tag:'Asmara QA',    desc:'QC tasks · SS25', avatar:'QA', pendingCount:'0', kpiPending:'—' },
+  tech:    { label:'Tech team',    tag:'Tech Team',    desc:'Approvals · SS25', avatar:'TT', pendingCount:'5', kpiPending:'5' },
+};
+
+// ── NAVIGATION ───────────────────────────────────────────────
+function showPage(pageId, clickedEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById('page-' + pageId);
+  if (page) page.classList.add('active');
+  if (clickedEl) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    clickedEl.classList.add('active');
+  }
+  // close any open dropdowns
+  closeAllDropdowns();
+}
+
+// ── STYLE TABS ───────────────────────────────────────────────
+function switchStyleTab(tabId, clickedEl) {
+  document.querySelectorAll('[id^="stab-"]').forEach(t => { t.style.display = 'none'; });
+  const el = document.getElementById('stab-' + tabId);
+  if (el) el.style.display = '';
+  document.querySelectorAll('.tab-bar .tab').forEach(t => t.classList.remove('active'));
+  if (clickedEl) clickedEl.classList.add('active');
+  // special costing visibility
+  applyRoleVisibility();
+}
+
+// ── ROLE SWITCHING ───────────────────────────────────────────
+function switchRole(role, btn) {
+  currentRole = role;
+  const cfg = roleConfig[role];
+  // topbar
+  document.getElementById('topbar-role-tag').textContent = cfg.tag;
+  document.querySelector('.avatar').textContent = cfg.avatar;
+  // sidebar
+  document.getElementById('sidebar-role-name').textContent = cfg.label;
+  document.getElementById('sidebar-role-desc').textContent = cfg.desc;
+  // KPI
+  document.getElementById('kpi-pending').textContent = cfg.kpiPending;
+  // dashboard sub
+  if (role === 'factory') {
+    document.getElementById('dashboard-sub').textContent = 'ABC Apparel Ltd · Assigned styles only';
+  } else if (role === 'tech') {
+    document.getElementById('dashboard-sub').textContent = 'SS25 · Pending approvals require your review';
+    showPage('approvals', document.querySelector('#sidebar .nav-item[onclick*="approvals"]'));
+  } else if (role === 'qa') {
+    document.getElementById('dashboard-sub').textContent = 'QC tasks · Assigned styles only';
+  } else {
+    document.getElementById('dashboard-sub').textContent = 'SS25 season · 142 active styles · Last updated just now';
+  }
+  // bell count
+  const bell = document.getElementById('bell-count');
+  bell.textContent = role === 'tech' ? '5' : role === 'merch' ? '5' : '2';
+  // demo bar buttons
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  // apply all visibility rules
+  applyRoleVisibility();
+  // close dropdowns
+  closeAllDropdowns();
+}
+
+function applyRoleVisibility() {
+  const r = currentRole;
+  // Approval panel — tech only
+  const techAct = document.getElementById('tech-actions');
+  const nonTech = document.getElementById('non-tech-notice');
+  if (techAct && nonTech) {
+    techAct.style.display = r === 'tech' ? '' : 'none';
+    nonTech.style.display = r !== 'tech' ? '' : 'none';
+  }
+  // Color approval — merch only
+  const mca = document.getElementById('merch-color-actions');
+  const nmca = document.getElementById('non-merch-color');
+  if (mca && nmca) {
+    mca.style.display = r === 'merch' ? '' : 'none';
+    nmca.style.display = r !== 'merch' ? '' : 'none';
+  }
+  // Submit + edit buttons — merch only
+  const editBtn = document.getElementById('edit-style-btn');
+  const submitBtn = document.getElementById('submit-approval-btn');
+  if (editBtn) editBtn.style.display = r === 'merch' ? '' : 'none';
+  if (submitBtn) submitBtn.style.display = r === 'merch' ? '' : 'none';
+  // Costing — merch only on style detail
+  const ct = document.getElementById('costing-tab');
+  if (ct) ct.style.display = r === 'merch' ? '' : 'none';
+  // Costing tab content
+  const cv = document.getElementById('costing-merch-view');
+  const ch = document.getElementById('costing-hidden');
+  if (cv && ch) {
+    cv.style.display = r === 'merch' ? '' : 'none';
+    ch.style.display = r !== 'merch' ? '' : 'none';
+  }
+  // Costing page
+  const cpContent = document.getElementById('costing-page-content');
+  const cpLocked  = document.getElementById('costing-page-locked');
+  const cpNav     = document.getElementById('nav-costing');
+  const cpTile    = document.getElementById('costing-tile');
+  if (cpContent && cpLocked) {
+    cpContent.style.display = r === 'merch' ? '' : 'none';
+    cpLocked.style.display  = r !== 'merch' ? '' : 'none';
+  }
+  if (cpNav) cpNav.style.display = r === 'merch' ? '' : 'none';
+  if (cpTile) cpTile.style.opacity = r === 'merch' ? '1' : '.4';
+  // Approvals nav — tech + merch
+  const navAp = document.getElementById('nav-approvals');
+  if (navAp) navAp.style.display = (r === 'tech' || r === 'merch') ? '' : 'none';
+  // Pending panel title
+  const ppt = document.getElementById('pending-panel-title');
+  if (ppt) ppt.textContent = r === 'tech' ? 'Pending — your approvals inbox' : 'Pending approvals';
+}
+
+// ── DROPDOWNS ────────────────────────────────────────────────
+function toggleBell(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('bell-dd');
+  dd.classList.toggle('open');
+  document.getElementById('avatar-dd').classList.remove('open');
+}
+function toggleAvatar(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('avatar-dd');
+  dd.classList.toggle('open');
+  document.getElementById('bell-dd').classList.remove('open');
+}
+function closeAllDropdowns() {
+  document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('open'));
+}
+document.addEventListener('click', closeAllDropdowns);
+
+// ── APPROVAL ACTIONS ─────────────────────────────────────────
+function doApprove() {
+  document.getElementById('approve-modal').classList.add('open');
+}
+function doReject() {
+  document.getElementById('reject-modal').classList.add('open');
+}
+function doInfoRequest() {
+  alert('More information requested. Merch will be notified.');
+}
+function closeApproveModal() {
+  document.getElementById('approve-modal').classList.remove('open');
+  // Update the stage row to approved
+  const apBanner = document.getElementById('ap-status-banner');
+  if (apBanner) {
+    apBanner.className = '';
+    apBanner.style.cssText = 'padding:10px 12px;background:var(--success-bg);border-radius:var(--r);border:1px solid #86EFAC;font-size:.75rem;color:var(--success);margin-bottom:12px;';
+    apBanner.innerHTML = '<strong>Stage approved</strong><br>3rd Fit is now unlocked.';
+  }
+}
+function confirmReject() {
+  const comment = document.getElementById('reject-comment').value;
+  if (!comment.trim()) { alert('Please add a rejection reason.'); return; }
+  document.getElementById('reject-modal').classList.remove('open');
+  const apBanner = document.getElementById('ap-status-banner');
+  if (apBanner) {
+    apBanner.className = '';
+    apBanner.style.cssText = 'padding:10px 12px;background:var(--danger-bg);border-radius:var(--r);border:1px solid #FCA5A5;font-size:.75rem;color:var(--danger);margin-bottom:12px;';
+    apBanner.innerHTML = '<strong>Stage rejected</strong><br>Merch notified. Reason: ' + comment;
+  }
+}
+function closeRejectModal() { document.getElementById('reject-modal').classList.remove('open'); }
+
+// ── ATTACHMENT MODAL ─────────────────────────────────────────
+function openModal()  { document.getElementById('attachment-modal').classList.add('open'); }
+function closeModal() { document.getElementById('attachment-modal').classList.remove('open'); }
+
+// ── SEARCH ───────────────────────────────────────────────────
+function handleSearch(val) {
+  if (val.toUpperCase().startsWith('HCO')) {
+    showPage('style-detail', null);
+  }
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+applyRoleVisibility();
+</script>
+</body>
+</html>
